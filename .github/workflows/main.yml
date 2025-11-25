@@ -39,7 +39,7 @@ jobs:
           dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
       - name: Build and analyze
         env:
-          SONAR_TOKEN: f359a17b1e5150082b42ba2f7376057ee533a048
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"Alejandrofull_ApiPeliculas" /o:"alejandrofull" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
