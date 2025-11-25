@@ -1,0 +1,67 @@
+﻿@page "/peliculas/editar/{id:int}"
+@using PeliculasFrontend.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Editar Película</h3>
+
+@if (pelicula == null)
+{
+    <div class="alert alert-info">Cargando información...</div>
+}
+else
+{
+    <EditForm Model="@pelicula" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Título:</label>
+            <InputText @bind-Value="pelicula.Titulo" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Año:</label>
+            <InputNumber @bind-Value="pelicula.Año" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Género:</label>
+            <InputText @bind-Value="pelicula.Genero" class="form-control" />
+        </div>
+
+        <button class="btn btn-primary">Guardar Cambios</button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </EditForm>
+}
+
+@code {
+    private Pelicula? pelicula;
+    private string errorMessage;
+
+    [Parameter]
+    public int id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        pelicula = await Http.GetFromJsonAsync<Pelicula>($"api/Peliculas/{id}");
+    }
+
+    private async Task HandleSubmit()
+    {
+        var response = await Http.PutAsJsonAsync($"api/Peliculas/{id}", pelicula);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/peliculas");
+        }
+        else
+        {
+            errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+}

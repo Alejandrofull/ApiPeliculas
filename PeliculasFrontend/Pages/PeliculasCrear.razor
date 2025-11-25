@@ -1,0 +1,54 @@
+﻿@page "/peliculas/crear"
+@using PeliculasFrontend.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Crear Nueva Película</h3>
+
+<EditForm Model="@pelicula" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Título:</label>
+        <InputText @bind-Value="pelicula.Titulo" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Año:</label>
+        <InputNumber @bind-Value="pelicula.Año" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Género:</label>
+        <InputText @bind-Value="pelicula.Genero" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary">Guardar</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3">@errorMessage</div>
+    }
+</EditForm>
+
+@code {
+    private Pelicula pelicula = new();
+    private string errorMessage;
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+
+        var response = await Http.PostAsJsonAsync("api/Peliculas", pelicula);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/peliculas");
+        }
+        else
+        {
+            errorMessage = await response.Content.ReadAsStringAsync();
+        }
+    }
+}
