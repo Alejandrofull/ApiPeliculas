@@ -1,5 +1,4 @@
 name: SonarQube
-
 on:
   push:
     branches:
@@ -28,7 +27,6 @@ jobs:
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
 
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
@@ -53,18 +51,23 @@ jobs:
             /k:"Alejandrofull_ApiPeliculas" `
             /o:"alejandrofull" `
             /d:sonar.host.url="https://sonarcloud.io" `
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+            /d:sonar.cs.vstest.reportsPaths="**/*.trx" `
+            /d:sonar.cs.opencover.reportsPaths="coverage/coverage.opencover.xml"
 
       - name: Build solution
         run: dotnet build --no-incremental
 
       - name: Run tests with coverage
-        run: dotnet test --collect:"XPlat Code Coverage"
+        run: dotnet test --collect:"XPlat Code Coverage" --logger "trx"
 
-      - name: Convert coverage to OpenCover
+      - name: Convert coverage to opencover
+        shell: powershell
         run: |
           dotnet tool install --global dotnet-reportgenerator-globaltool
-          reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage -reporttypes:opencover
+          reportgenerator `
+            -reports:**/coverage.cobertura.xml `
+            -targetdir:coverage `
+            -reporttypes:opencover
 
       - name: End SonarCloud analysis
         env:
